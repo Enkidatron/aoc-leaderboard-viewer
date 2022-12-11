@@ -13,16 +13,13 @@ init : Flags -> ( Model, Cmd Msg )
 init { currentTime, snapshot } =
     ( snapshot
         |> Maybe.andThen
-            (\{ url, cookie, plot } ->
+            (\{ data, plot } ->
                 plot
                     |> Plot.fromString
                     |> Result.toMaybe
                     |> Maybe.map
                         (\plot_ ->
-                            { url = url
-                            , cookie = cookie
-                            , data = NotAsked
-                            , timeOfFetch = Time.millisToPosix currentTime
+                            { data = data
                             , zone = Time.utc
                             , hover = Nothing
                             , plot = plot_
@@ -30,10 +27,7 @@ init { currentTime, snapshot } =
                         )
             )
         |> Maybe.withDefault
-            { url = ""
-            , cookie = ""
-            , data = NotAsked
-            , timeOfFetch = Time.millisToPosix currentTime
+            { data = ""
             , zone = Time.utc
             , hover = Nothing
             , plot = OneForEachMember
@@ -48,48 +42,16 @@ port saveSnapshot : Snapshot -> Cmd msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetUrl url ->
+        SetData data ->
             let
                 newModel =
-                    { model | url = url }
+                    { model | data = data }
             in
             ( newModel
             , saveSnapshot
-                { url = url
-                , cookie = model.cookie
+                { data = data
                 , plot = Plot.toString model.plot
                 }
-            )
-
-        SetCookie cookie ->
-            let
-                newModel =
-                    { model | cookie = cookie }
-            in
-            ( newModel
-            , saveSnapshot
-                { url = model.url
-                , cookie = cookie
-                , plot = Plot.toString model.plot
-                }
-            )
-
-        Fetch url cookie ->
-            ( { model | data = Loading }
-            , Cmd.batch
-                [ getCurrentTime
-                , getData model.url model.cookie
-                ]
-            )
-
-        FetchResult data ->
-            ( { model | data = data }
-            , Cmd.none
-            )
-
-        CurrentTime time ->
-            ( { model | timeOfFetch = time }
-            , Cmd.none
             )
 
         CurrentZone zone ->
@@ -109,33 +71,10 @@ update msg model =
             in
             ( newModel
             , saveSnapshot
-                { url = model.url
-                , cookie = model.cookie
+                { data = model.data
                 , plot = Plot.toString plot
                 }
             )
-
-
-getCurrentTime : Cmd Msg
-getCurrentTime =
-    Time.now
-        |> Task.perform CurrentTime
-
-
-getData : String -> String -> Cmd Msg
-getData url cookie =
-    Http.get
-        { url = proxyUrl url cookie
-        , expect = Http.expectJson (RemoteData.fromResult >> FetchResult) dataDecoder
-        }
-
-
-proxyUrl : String -> String -> String
-proxyUrl url cookie =
-    --"http://localhost:5000/"
-    "https://aoc-leaderboard-json-proxy.herokuapp.com/"
-        ++ ("?url=" ++ url)
-        ++ ("&cookie=" ++ cookie)
 
 
 subscriptions : Model -> Sub Msg

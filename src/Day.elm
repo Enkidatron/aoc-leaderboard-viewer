@@ -5,9 +5,9 @@ import List.Extra
 
 startOfAoC : Float
 startOfAoC =
-    -- 2020/12/01, 05:00 GMT
+    -- 2022/12/01, 05:00 GMT
     -- in milliseconds
-    1606798800000
+    1669867200000
 
 
 endOfAoC : Float

@@ -3,6 +3,8 @@ module View.Plot exposing (fromString, plot, toString)
 import Example
 import Html as H exposing (Html)
 import Http exposing (Error(..))
+import Json
+import Json.Decode
 import RemoteData exposing (RemoteData(..))
 import Types exposing (..)
 import View.Plot.Type.AllInOne as View
@@ -35,26 +37,16 @@ fromString string =
 plot : Model -> Html Msg
 plot model =
     H.div []
-        (case model.data of
-            NotAsked ->
-                if Example.shouldShow model then
-                    plotView
-                        { model | data = Success Example.data }
-                        Example.data
+        (if Example.shouldShow model then
+            plotView model Example.data
 
-                else
-                    [ H.text "" ]
+         else
+            case Json.Decode.decodeString Json.dataDecoder model.data of
+                Err err ->
+                    [ viewFailure err ]
 
-            Loading ->
-                [ viewLoading ]
-
-            Failure err ->
-                [ viewFailure err ]
-
-            Success realData ->
-                plotView
-                    model
-                    realData
+                Ok data ->
+                    plotView model data
         )
 
 
@@ -73,30 +65,6 @@ plotView model data =
             View.oneForEachMember model filteredData
 
 
-viewLoading : Html Msg
-viewLoading =
-    H.text "Loading from the AoC site..."
-
-
-viewFailure : Http.Error -> Html Msg
+viewFailure : Json.Decode.Error -> Html Msg
 viewFailure err =
-    H.text <| "Error: " ++ httpErrorToString err
-
-
-httpErrorToString : Http.Error -> String
-httpErrorToString err =
-    case err of
-        Timeout ->
-            "Timeout exceeded"
-
-        NetworkError ->
-            "Network error"
-
-        BadStatus code ->
-            "Bad status: " ++ String.fromInt code
-
-        BadBody e ->
-            "Bad body: " ++ e
-
-        BadUrl url ->
-            "Bad URL: " ++ url
+    H.text <| "Error: " ++ Json.Decode.errorToString err

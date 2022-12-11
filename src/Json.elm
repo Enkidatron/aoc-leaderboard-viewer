@@ -18,7 +18,7 @@ memberDecoder : Decoder Member
 memberDecoder =
     JD.map6 Member
         (JD.field "name" (JD.maybe JD.string))
-        (JD.field "id" JD.string)
+        (JD.field "id" (JD.map String.fromInt JD.int))
         (JD.field "local_score" JD.int)
         (JD.field "global_score" JD.int)
         (JD.field "stars" JD.int)
@@ -27,16 +27,8 @@ memberDecoder =
 
 posixDecoder : Decoder Posix
 posixDecoder =
-    JD.string
-        |> JD.andThen
-            (\string ->
-                case String.toInt string of
-                    Nothing ->
-                        JD.fail <| "bad timestamp format: " ++ string
-
-                    Just int ->
-                        JD.succeed <| Time.millisToPosix <| int * 1000
-            )
+    JD.int
+        |> JD.map (\int -> Time.millisToPosix <| int * 1000)
 
 
 completionTimesDecoder : Decoder (List ( Day, Star, Posix ))

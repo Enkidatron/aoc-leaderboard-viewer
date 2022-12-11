@@ -93,98 +93,27 @@ heading =
 form : Model -> Html Msg
 form model =
     H.div []
-        [ urlInput model
-        , cookieInput model
-        , fetchButton model
-        , warning
+        [ dataInput model
         , radioButtons model
         ]
 
 
-urlInput : Model -> Html Msg
-urlInput model =
+dataInput : Model -> Html Msg
+dataInput model =
     H.div
         [ HA.class "form-group row" ]
         [ H.label [ HA.class "col-lg-3 col-form-label" ]
-            [ H.text "Leaderboard JSON URL:"
+            [ H.text "Leaderboard JSON:"
             ]
         , H.div [ HA.class "col-lg-9" ]
             [ H.input
-                [ HA.placeholder Example.url
-                , HA.value model.url
+                [ HA.placeholder <| "JSON, eg. from: " ++ Example.url
+                , HA.value model.data
                 , HA.class "form-control"
-                , HE.onInput SetUrl
+                , HE.onInput SetData
                 ]
                 []
             ]
-        ]
-
-
-cookieInput : Model -> Html Msg
-cookieInput model =
-    H.div
-        [ HA.class "form-group row" ]
-        [ H.label [ HA.class "col-lg-3 col-form-label" ]
-            [ H.text "Session cookie "
-            , H.a
-                [ HA.target "_blank"
-                , HA.href "https://i.imgur.com/75BC9zU.png"
-                ]
-                [ H.text "(what?!)" ]
-            , H.text ":"
-            ]
-        , H.div [ HA.class "col-lg-9" ]
-            [ H.input
-                [ HA.placeholder Example.cookie
-                , HA.value model.cookie
-                , HA.class "form-control"
-                , HE.onInput SetCookie
-                ]
-                []
-            ]
-        ]
-
-
-fetchButton : Model -> Html Msg
-fetchButton model =
-    H.div [ HA.class "form-group row" ]
-        [ H.div [ HA.class "col-lg-9" ]
-            [ H.button
-                [ HE.onClick (Fetch model.url model.cookie)
-                , HA.disabled (model.data == Loading)
-                , HA.class "btn btn-primary"
-                , HA.type_ "submit"
-                ]
-                [ H.text "Fetch! "
-                , case model.data of
-                    Success _ ->
-                        if not (Example.shouldShow model) then
-                            H.span [ HA.class "badge badge-light" ]
-                                [ H.text <|
-                                    "Last fetch at "
-                                        ++ (model.timeOfFetch
-                                                |> Date.fromPosix model.zone
-                                                |> Date.format "yyyy/MM/dd', 'HH:mm:ss"
-                                           )
-                                ]
-
-                        else
-                            H.text ""
-
-                    _ ->
-                        H.text ""
-                ]
-            ]
-        ]
-
-
-warning : Html Msg
-warning =
-    H.div
-        [ HA.class "alert alert-warning"
-        , HA.attribute "role" "alert"
-        ]
-        [ H.text "WARNING: clicking the \"Fetch!\" button sends your session cookie to my CORS proxy. I promise not to use it in any way, but... yeah, not ideal."
         ]
 
 

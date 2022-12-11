@@ -10,8 +10,7 @@ import Time exposing (Posix, Zone)
 
 
 type alias Snapshot =
-    { url : String
-    , cookie : String
+    { data : String
     , plot : String
     }
 
@@ -23,22 +22,15 @@ type alias Flags =
 
 
 type alias Model =
-    { url : String
-    , cookie : String
-    , data : WebData Data
-    , timeOfFetch : Posix
+    { data : String
+    , zone : Time.Zone
     , hover : Maybe Point
     , plot : Plot
-    , zone : Zone
     }
 
 
 type Msg
-    = SetUrl String
-    | SetCookie String
-    | Fetch String String
-    | FetchResult (WebData Data)
-    | CurrentTime Posix
+    = SetData String
     | CurrentZone Zone
     | Hover (Maybe Point)
     | ShowPlot Plot
