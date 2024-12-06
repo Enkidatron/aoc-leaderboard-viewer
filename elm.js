@@ -5951,7 +5951,7 @@ var $author$project$Day$findComfortableRange = F2(
 			}
 		}
 	});
-var $author$project$Day$startOfAoC = 1669867200000;
+var $author$project$Day$startOfAoC = 1733029200000;
 var $author$project$Day$comfortableRange = function (dataMax) {
 	return _Utils_Tuple2(
 		$author$project$Day$startOfAoC,
